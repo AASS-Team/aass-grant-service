@@ -27,14 +27,13 @@ class GrantsList(APIView):
             return Response(
                 data={
                     "errors": serializer.errors,
-                    "message": "Nepodarilo sa uložiť grant",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         serializer.save()
         return Response(
-            serializer.data,
+            data=serializer.data,
             status=status.HTTP_201_CREATED,
         )
 
@@ -53,7 +52,7 @@ class GrantDetail(APIView):
     def get(self, request, id, format=None):
         grant = self.get_object(id)
         serializer = serializers.GrantSerializer(grant)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, id, format=None):
         grant = self.get_object(id)
@@ -62,17 +61,24 @@ class GrantDetail(APIView):
         if not serializer.is_valid():
             return Response(
                 data={
-                    "message": "Nepodarilo sa uložiť grant",
                     "errors": serializer.errors,
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, id, format=None):
         grant = self.get_object(id)
-        grant.delete()
+        deleted_rows = grant.delete()
+
+        if len(deleted_rows) <= 0:
+            return Response(
+                data={
+                    "errors": {"global": "Nepodarilo sa vymazať grant"},
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
