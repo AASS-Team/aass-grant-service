@@ -34,9 +34,7 @@ class GrantsList(APIView):
 
         serializer.save()
         return Response(
-            data={
-                "message": "Grant uložený",
-            },
+            serializer.data,
             status=status.HTTP_201_CREATED,
         )
 
@@ -55,7 +53,7 @@ class GrantDetail(APIView):
     def get(self, request, id, format=None):
         grant = self.get_object(id)
         serializer = serializers.GrantSerializer(grant)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, id, format=None):
         grant = self.get_object(id)
@@ -71,14 +69,10 @@ class GrantDetail(APIView):
             )
 
         serializer.save()
-        return Response(data={"message": "Grant uložený"})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, id, format=None):
         grant = self.get_object(id)
         grant.delete()
 
-        return Response(
-            data={
-                "message": "Grant vymazaný",
-            },
-        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
